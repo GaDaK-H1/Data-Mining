@@ -77,6 +77,7 @@ import {
   references,
   navSections,
 } from "@/lib/project-data";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const CLASS_COLORS: Record<string, string> = {
   Easy: "#10b981",
@@ -256,6 +257,9 @@ function StickyNav() {
             {s.label}
           </a>
         ))}
+        <div className="ml-auto flex-shrink-0">
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   );
