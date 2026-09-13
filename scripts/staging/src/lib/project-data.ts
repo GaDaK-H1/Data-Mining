@@ -355,9 +355,6 @@ export const navSections = [
   { id: "evaluation", label: "Evaluation" },
   { id: "audit", label: "Leakage Audit" },
   { id: "errors", label: "Errors" },
-  { id: "explorer", label: "Data Explorer" },
-  { id: "predictor", label: "Predictor" },
-  { id: "try", label: "Try a Puzzle" },
   { id: "conclusion", label: "Conclusion" },
   { id: "downloads", label: "Downloads" },
 ];
