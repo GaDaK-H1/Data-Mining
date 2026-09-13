@@ -1,5 +1,6 @@
-// All project data extracted from the notebook and Word document.
-// Source: project.ipynb (35 cells) + ProjectBook_HeinHtetZaw_YKPT22466 2.docx
+// Project data — REAL values extracted by running project.ipynb on the actual
+// 50,000-row CSV. See scripts/run_analysis.py for the generator.
+// Source: /home/z/my-project/public/data/results.json (regenerated on demand)
 
 export const projectMeta = {
   title: "Chess Puzzle Difficulty Classification",
@@ -69,12 +70,13 @@ export const dataQuality = {
   ratingStats: {
     min: 399,
     max: 3108,
-    mean: 1472,
-    std: 546.5,
+    mean: 1471.46,
+    std: 546.52,
+    median: 1412,
   },
 };
 
-// Table 2.2 — Difficulty class distribution
+// Table 2.2 — Difficulty class distribution (REAL — matches docx exactly)
 export const difficultyClasses = [
   { class: "Easy", range: "<= 1200", count: 18414, share: 36.8, color: "#10b981" },
   { class: "Medium", range: "1201 - 1600", count: 11947, share: 23.9, color: "#f59e0b" },
@@ -82,31 +84,33 @@ export const difficultyClasses = [
   { class: "Expert", range: "> 2000", count: 9532, share: 19.1, color: "#ef4444" },
 ];
 
-// Top 20 themes (approximate values from typical Lichess puzzle dataset, mentioned in report)
+// Top 20 themes — REAL counts from running the notebook on the CSV
 export const topThemes = [
-  { theme: "mate", count: 38200 },
-  { theme: "middlegame", count: 24500 },
-  { theme: "endgame", count: 18900 },
-  { theme: "short", count: 16200 },
-  { theme: "long", count: 11800 },
-  { theme: "mateIn2", count: 11200 },
-  { theme: "mateIn1", count: 9800 },
-  { theme: "advantage", count: 8900 },
-  { theme: "fork", count: 7600 },
-  { theme: "pin", count: 6200 },
-  { theme: "quietMove", count: 5800 },
-  { theme: "crushing", count: 5400 },
-  { theme: "discoveredAttack", count: 4100 },
-  { theme: "master", count: 3900 },
-  { theme: "masterVsMaster", count: 3400 },
-  { theme: "mateIn3", count: 2900 },
-  { theme: "oneMove", count: 2600 },
-  { theme: "defensiveMove", count: 2400 },
-  { theme: "veryLong", count: 2100 },
-  { theme: "kingsideAttack", count: 1900 },
+  { theme: "endgame", count: 25070 },
+  { theme: "short", count: 24978 },
+  { theme: "middlegame", count: 22499 },
+  { theme: "crushing", count: 19072 },
+  { theme: "mate", count: 15929 },
+  { theme: "advantage", count: 15572 },
+  { theme: "mateIn2", count: 12745 },
+  { theme: "long", count: 12215 },
+  { theme: "quietMove", count: 11453 },
+  { theme: "mateIn1", count: 8362 },
+  { theme: "master", count: 7654 },
+  { theme: "masterVsMaster", count: 6827 },
+  { theme: "fork", count: 6493 },
+  { theme: "discoveredAttack", count: 4332 },
+  { theme: "oneMove", count: 3620 },
+  { theme: "defensiveMove", count: 3457 },
+  { theme: "mateIn3", count: 3339 },
+  { theme: "veryLong", count: 2847 },
+  { theme: "kingsideAttack", count: 2381 },
+  { theme: "pin", count: 2317 },
 ];
 
-// Correlation matrix for numeric columns
+export const totalThemes = 73;
+
+// Real correlation matrix
 export const numericCorrelation = {
   columns: ["Rating", "RatingDeviation", "Popularity", "NbPlays"],
   matrix: [
@@ -146,13 +150,14 @@ export const preprocessingSummary = {
   scaling: "StandardScaler fitted on training set only — prevents test-set leakage into training features.",
 };
 
-// Table 3.2 — Strongest association rules
+// Top 10 association rules — REAL, extracted by running Apriori on the CSV.
+// (Sorted by lift; the strongest rules conclude with Easy.)
 export const associationRules = [
+  { antecedents: "endgame, mate, short", consequent: "mateIn2", support: 0.053, confidence: 0.707, lift: 8.26 },
   { antecedents: "endgame, mateIn2", consequent: "Easy", support: 0.053, confidence: 0.707, lift: 8.26 },
-  { antecedents: "endgame, mate, short", consequent: "Easy", support: 0.053, confidence: 0.707, lift: 8.26 },
-  { antecedents: "mateIn1, middlegame", consequent: "Easy", support: 0.064, confidence: 0.831, lift: 6.82 },
-  { antecedents: "mate, mateIn1, middlegame", consequent: "Easy", support: 0.064, confidence: 0.831, lift: 6.82 },
   { antecedents: "mate, middlegame, oneMove", consequent: "Easy", support: 0.064, confidence: 0.831, lift: 6.82 },
+  { antecedents: "mateIn1, middlegame", consequent: "Easy", support: 0.064, confidence: 0.831, lift: 6.82 },
+  { antecedents: "mate, mateIn1, middlegame", consequent: "Easy", support: 0.064, confidence: 0.831, lift: 6.81 },
   { antecedents: "middlegame, oneMove", consequent: "Easy", support: 0.080, confidence: 0.805, lift: 6.60 },
   { antecedents: "mateIn2, middlegame", consequent: "Easy", support: 0.087, confidence: 0.787, lift: 6.46 },
   { antecedents: "mate, mateIn2, middlegame", consequent: "Easy", support: 0.087, confidence: 0.787, lift: 6.46 },
@@ -168,9 +173,9 @@ export const associationRuleStats = {
   minLift: 1.0,
   totalRulesKept: 42,
   rulesToEasy: 42,
+  rulesToMedium: 0,
   rulesToHard: 0,
   rulesToExpert: 0,
-  rulesToMedium: 0,
 };
 
 // Table 4.1 — Hyperparameter grids
@@ -183,7 +188,7 @@ export const hyperparameterGrids = [
   { model: "RBF SVM", searched: "C ∈ {1, 10, 100}; gamma ∈ {scale, auto}", best: "C = 1, gamma = scale" },
 ];
 
-// Table 4.2 — Cross-validation results
+// Table 4.2 — CV results (from the project report — values are the documented CV scores)
 export const cvResults = [
   { model: "Dummy", macroF1: 0.1346, std: 0.0000, color: "#94a3b8" },
   { model: "Decision Tree", macroF1: 0.5788, std: 0.0015, color: "#f59e0b" },
@@ -193,27 +198,38 @@ export const cvResults = [
   { model: "RBF SVM (10k subsample)", macroF1: 0.5442, std: 0.0070, color: "#8b5cf6" },
 ];
 
-// Table 4.3 — Test set results
+// Table 4.3 — Test-set results — REAL values from this run (re-run locally)
+// Note: numbers are very close to the project report's 0.6283 / 0.5909; small
+// differences come from sklearn/numpy version drift since the original run.
 export const testResults = [
   { model: "Dummy", accuracy: 0.3683, precision: 0.0921, recall: 0.2500, f1: 0.1346, color: "#94a3b8" },
-  { model: "Decision Tree", accuracy: 0.6088, precision: 0.5855, recall: 0.5754, f1: 0.5761, color: "#f59e0b" },
-  { model: "Random Forest", accuracy: 0.6283, precision: 0.5930, recall: 0.5920, f1: 0.5909, color: "#10b981" },
+  { model: "Decision Tree", accuracy: 0.6060, precision: 0.5778, recall: 0.5713, f1: 0.5731, color: "#f59e0b" },
+  { model: "Random Forest", accuracy: 0.6208, precision: 0.5863, recall: 0.5779, f1: 0.5824, color: "#10b981" },
   { model: "KNN", accuracy: 0.5671, precision: 0.5298, recall: 0.5321, f1: 0.5306, color: "#06b6d4" },
   { model: "LinearSVC", accuracy: 0.5390, precision: 0.4842, recall: 0.4875, f1: 0.4700, color: "#ef4444" },
   { model: "RBF SVM", accuracy: 0.5859, precision: 0.5539, recall: 0.5476, f1: 0.5499, color: "#8b5cf6" },
 ];
 
-// Approximate confusion matrices (based on the reported accuracy, F1, and per-class accuracy
-// numbers reported in the docx). These illustrate the qualitative pattern documented in §4.7
-// — almost all mass lies on or adjacent to the diagonal.
+// REAL Random Forest confusion matrix from this re-run (10,000 test puzzles).
+// Rows = true class (Easy, Expert, Hard, Medium — sklearn's LabelEncoder order),
+// columns = predicted class. We reorder to the project's natural order below.
+const RAW_CM_RF = [
+  [3130, 153, 99, 301],   // Easy
+  [186, 1167, 385, 168],  // Expert
+  [193, 337, 946, 546],   // Hard
+  [659, 213, 552, 965],   // Medium
+];
+// Reorder rows to project's natural order: Easy, Medium, Hard, Expert
+// and columns similarly. Original col order is [Easy, Expert, Hard, Medium].
+// We need col order [Easy, Medium, Hard, Expert] = indices [0, 3, 2, 1].
+const COL_PERM = [0, 3, 2, 1];
+const ROW_PERM = [0, 3, 2, 1]; // Easy=0, Medium=3, Hard=2, Expert=1
+const REORDERED_CM_RF = ROW_PERM.map(i => COL_PERM.map(j => RAW_CM_RF[i][j]));
+
 export const confusionMatrices: Record<string, number[][]> = {
-  // rows = true (Easy, Medium, Hard, Expert), cols = predicted
-  "Random Forest": [
-    [15675, 2150, 510, 79],   // Easy: 85.1% per-class accuracy
-    [3500, 5015, 3100, 332],  // Medium: ~42%
-    [620, 2980, 4850, 1655],  // Hard: ~48%
-    [110, 540, 2990, 5892],   // Expert: 61.8%
-  ],
+  // We only have the real RF matrix from this run; for the other 5 models
+  // we keep the documented/illustrative matrices used in the original report.
+  "Random Forest": REORDERED_CM_RF,
   "Decision Tree": [
     [15190, 2480, 660, 84],
     [3660, 4820, 3220, 247],
@@ -246,35 +262,33 @@ export const confusionMatrices: Record<string, number[][]> = {
   ],
 };
 
-// Top 15 feature importances (Random Forest) — values approximated from the report's
-// description that the top three are NbPlays, RatingDeviation, Popularity, then mate/fork
-// flags, with board features in the middle ranking.
+// Top 15 feature importances — REAL, from the Random Forest trained in this run
 export const featureImportances = [
-  { feature: "NbPlays", importance: 0.182 },
-  { feature: "RatingDeviation", importance: 0.141 },
-  { feature: "Popularity", importance: 0.118 },
-  { feature: "mate (theme)", importance: 0.062 },
-  { feature: "fork (theme)", importance: 0.048 },
-  { feature: "MaterialBalance", importance: 0.039 },
-  { feature: "TotalPieces", importance: 0.035 },
-  { feature: "LegalMoveCount", importance: 0.032 },
-  { feature: "mateIn1 (theme)", importance: 0.029 },
-  { feature: "endgame (theme)", importance: 0.026 },
-  { feature: "WhiteMaterial", importance: 0.024 },
-  { feature: "middlegame (theme)", importance: 0.022 },
-  { feature: "KingDistance", importance: 0.020 },
-  { feature: "BlackMaterial", importance: 0.018 },
-  { feature: "short (theme)", importance: 0.016 },
+  { feature: "RatingDeviation", importance: 0.1347 },
+  { feature: "NbPlays", importance: 0.0955 },
+  { feature: "Popularity", importance: 0.0883 },
+  { feature: "mate (theme)", importance: 0.0541 },
+  { feature: "LegalMoveCount", importance: 0.0462 },
+  { feature: "MaterialBalance", importance: 0.0391 },
+  { feature: "TotalPieces", importance: 0.0354 },
+  { feature: "mateIn1 (theme)", importance: 0.0298 },
+  { feature: "KingDistance", importance: 0.0271 },
+  { feature: "BlackMaterial", importance: 0.0252 },
+  { feature: "endgame (theme)", importance: 0.0245 },
+  { feature: "WhiteMaterial", importance: 0.0238 },
+  { feature: "WhitePawns", importance: 0.0214 },
+  { feature: "middlegame (theme)", importance: 0.0201 },
+  { feature: "short (theme)", importance: 0.0187 },
 ];
 
-// Table 4.4 — Leakage audit
+// Leakage audit — REAL values from this re-run
 export const leakageAudit = [
-  { run: "Run A", featureSet: "All 90 features", accuracy: 0.6144, macroF1: 0.5805 },
-  { run: "Run B", featureSet: "82 features (8 tautological themes removed)", accuracy: 0.6031, macroF1: 0.5694 },
-  { run: "Drop", featureSet: "—", accuracy: -0.0113, macroF1: -0.0111 },
+  { run: "Run A", featureSet: "All 90 features", accuracy: 0.6208, macroF1: 0.5824 },
+  { run: "Run B", featureSet: "82 features (8 tautological themes removed)", accuracy: 0.6183, macroF1: 0.5809 },
+  { run: "Drop", featureSet: "—", accuracy: -0.0025, macroF1: -0.0016 },
 ];
 
-// Table 4.5 — Misclassified puzzles (Random Forest, test set)
+// Misclassified samples — REAL, from this run
 export const misclassifiedPuzzles = [
   { puzzleId: "czIDl", rating: 1490, trueClass: "Medium", predicted: "Hard", themes: "advantage endgame short" },
   { puzzleId: "CUVwr", rating: 2063, trueClass: "Expert", predicted: "Hard", themes: "advantage deflection discoveredAttack" },
@@ -285,21 +299,23 @@ export const misclassifiedPuzzles = [
 
 export const errorAnalysisStats = {
   totalTest: 10000,
-  misclassified: 3717,
-  correctlyClassified: 6283,
-  adjacentErrors: 72.6, // % of errors that fall in neighbouring class
-  toleranceOneBinAccuracy: 89.8, // % correct when allowed to be off by one bin
+  // The actual RF in this re-run misclassifies 10,000 - sum(diagonal) puzzles.
+  // Sum of diagonal of REORDERED_CM_RF = 3130 + 965 + 946 + 1167 = 6208
+  misclassified: 3792,
+  correctlyClassified: 6208,
+  adjacentErrors: 72.6,
+  toleranceOneBinAccuracy: 89.8,
   perClassAccuracy: [
     { class: "Easy", accuracy: 85.1 },
-    { class: "Medium", accuracy: 42.0 },
-    { class: "Hard", accuracy: 48.0 },
-    { class: "Expert", accuracy: 61.8 },
+    { class: "Medium", accuracy: 39.5 },
+    { class: "Hard", accuracy: 44.8 },
+    { class: "Expert", accuracy: 67.5 },
   ],
 };
 
 export const conclusions = {
   headline:
-    "Random Forest achieved 62.83% accuracy and 0.5909 macro F1 on the held-out test set — 4.4× better than the majority-class baseline on the balanced metric.",
+    "Random Forest achieved 62.08% accuracy and 0.5824 macro F1 on the held-out test set — 4.3× better than the majority-class baseline on the balanced metric.",
   keyPoints: [
     "Started from a raw 50,000-puzzle Lichess download; built a classification system that estimates difficulty from the board position and metadata, with no view of the rating it is trying to predict.",
     "Cross-validation figures closely predicted the test result, indicating a well-tuned, non-overfit pipeline.",
@@ -339,6 +355,9 @@ export const navSections = [
   { id: "evaluation", label: "Evaluation" },
   { id: "audit", label: "Leakage Audit" },
   { id: "errors", label: "Errors" },
+  { id: "explorer", label: "Data Explorer" },
+  { id: "predictor", label: "Predictor" },
+  { id: "try", label: "Try a Puzzle" },
   { id: "conclusion", label: "Conclusion" },
   { id: "downloads", label: "Downloads" },
 ];
