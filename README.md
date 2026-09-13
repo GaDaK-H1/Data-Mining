@@ -1,4 +1,4 @@
-# Data-Mining-
+# Data-Mining
 
 Chess Puzzle Difficulty Classification — an IS-212 Data and Knowledge Mining course project.
 
