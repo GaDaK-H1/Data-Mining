@@ -1,0 +1,227 @@
+     1→Total paragraphs: 198
+     2→Total tables: 9
+     3→================================================================================
+     4→[0][Normal] UNIVERSITY OF COMPUTER STUDIES, YANGON
+     5→[1][Normal] 2025-2026 ACADEMIC YEAR
+     6→[3][Normal] Project Report On
+     7→[4][Normal] CHESS PUZZLE DIFFICULTY CLASSIFICATION
+     8→[5][Normal] Semester IX
+     9→[6][Normal] DATA AND KNOWLEDGE MINING (IS-212) PROJECT
+    10→[8][Normal] Submitted By
+    11→[9][Normal] YKPT-22466 Hein Htet Zaw
+    12→[10][Normal] September 2026
+    13→[11][Normal] B.C.Sc. (SE)
+    14→[13][Normal] Table of Contents
+    15→[15][Heading 1] Acknowledgement
+    16→[16][Normal] I would like to thank my course instructor, Dr. Hsu Myat MO, for guiding the class through the IS-212 lectures and for answering my questions during lab sessions. The lectures on classification, association rule mining, and model evaluation formed the foundation of this project. The feedback I received during the planning phase helped me avoid several potential mistakes.
+    17→[19][Heading 1] Chapter 1
+    18→[20][Heading 1] Introduction
+    19→[21][Normal] This report presents my individual project for the IS-212 Data and Knowledge Mining course. The project applies both descriptive and predictive data mining techniques to a real dataset, implemented in a Jupyter notebook on Google Colab. All results and figures in the following chapters were generated directly from the raw CSV file using this notebook.
+    20→[23][Heading 2] 1.1 Project Background
+    21→[24][Normal] Lichess is a free and open-source chess server, and in addition to hosting games it keeps a large public database of chess puzzles. A puzzle consists of a single position taken from a real game in which one side has the possibility of gaining material or delivering checkmate, and each puzzle on the site is given a Glicko rating which indicates the level of strength that a player needs to solve it. The database also records metadata including how many times the puzzle has been played, what tactical themes occur in the solution sequence, and the FEN string which describes the board.
+    22→[25][Normal] The rating value cannot be used as an input feature, as it is the target variable. The key question is whether the board structure and puzzle metadata provide enough information to estimate a puzzle's difficulty class without its rating. This is important for training tools that need to estimate difficulty for new puzzles that have not yet been rated.
+    23→[26][Normal] I choose this dataset because it is sufficiently large for meaningful evaluation, contains a mix of numerical, categorical, and board-derived features, and the target variable has a natural ordinal structure. The four classes are not equally separable, and the class boundaries are defined on a continuous scale, as discussed in the evaluation chapter.
+    24→[28][Heading 2] 1.2 Objectives of the Project
+    25→[29][Normal] The objectives of this project are the following:
+    26→[30][List Paragraph] Constructing a full data mining pipeline, starting with a raw CSV file and ending with evaluated models, so that it can run reproducibly on Google Colab.
+    27→[31][List Paragraph] It is possible to determine the difficulty class of a chess puzzle—classifying it as Easy, Medium, Hard, or Expert—on the basis of the board features and the puzzle metadata, without making use of the rating value itself.
+    28→[32][List Paragraph] Applying descriptive mining in the shape of association rule analysis between tactical themes and difficulty classes can be done using the Apriori algorithm [2].
+    29→[33][List Paragraph] We compared six classifiers—these included a baseline, two tree ensembles, a method based on neighbours, and two support vector machines—using the same evaluation procedure and taking the macro averaged F1 score as the main metric.
+    30→[34][List Paragraph] Auditing the trained models for shortcut learning by eliminating any potentially leaking features and observing the resulting drop in performance.
+    31→[35][List Paragraph] To examine the mistakes of the best model and to explain where the remaining accuracy is being lost.
+    32→[38][Heading 2] 1.3 Tools and Environment
+    33→[39][Normal] The whole project is implemented in a single Jupyter notebook (analysis.ipynb) with 35 cells, executed on Google Colab with a standard CPU runtime . The main libraries are pandas and NumPy for data handling, scikit-learn for the models and the evaluation protocol , python-chess for reading chess positions, and mlxtend for the Apriori implementation . Charts are drawn with matplotlib. The dataset is stored in Google Drive and mounted at the start of the notebook, so every run uses the same 50,000 puzzle sample.
+    34→[42][Heading 1] Chapter 2
+    35→[43][Heading 1] Dataset Description and Exploratory Data Analysis
+    36→[44][Heading 2] 2.1 Dataset Overview
+    37→[45][Normal] The dataset consists of a sample containing 50,000 rows from the Lichess puzzle database and is stored in the file lichess_db_puzzle_sample.csv; each row in the dataset corresponds to one puzzle, and Table 2.1 provides the names of the eleven columns of the original file.
+    38→[47][Normal] Table 2.1: Columns of the raw dataset
+    39→[48][Heading 2] 2.2 Data Quality Check
+    40→[49][Normal] The initial data quality check assessed missing values and duplicate rows. The dataset contained no duplicates, but two columns were largely empty: OpeningTags was missing in 79.80% of rows and DailyDate in 99.97%. Both columns, along with identifier and link columns that have no predictive value, were dropped during preprocessing. The three numeric metadata columns (RatingDeviation, Popularity, NbPlays) and the two relevant text columns (FEN and Themes) are complete with no missing values.
+    41→[51][Heading 2] 2.3 Target Variable and Difficulty Classes
+    42→[52][Normal] The ratings range from 399 to 3108, having a mean of approximately 1472 and a standard deviation of 546.5. In the case of the classification task, this continuous scale is divided into four difficulty categories using predetermined thresholds: Easy for ratings of 1200 or less, Medium for those up to 1600, Hard for ratings up to 2000, and Expert for ratings above 2000. The thresholds were set before any modelling was carried out, meaning that the definition of the classes is in no way dependent on the models.
+    43→[53][Normal] In Figure 2.1 the rating histogram is shown with the three cut-off points indicated. The distribution has a long tail on the right with a small number of puzzles lying above 2800. Figure 2.2 and Table 2.2 display the class distribution obtained. The classes are imbalanced since the Easy class is the largest, making up 36.8% of the puzzles, then comes the Medium class at 23.9%, followed by the Hard class with 20.2% and finally the Expert class with 19.1%. It is because of this imbalance that the project employs macro averaged F1 as its main metric rather than plain accuracy, a point to which I shall return in Chapter 4.
+    44→[56][Normal] Figure 2.1: Rating distribution with the class boundaries at 1200 / 1600 / 2000
+    45→[59][Normal] Figure 2.2: Distribution of difficulty classes
+    46→[61][Normal] The rating is binned and the class counts are as shown in Table 2.2.
+    47→[62][Heading 2] 2.4 Relationships Between Features
+    48→[63][Normal] Figure 2.3 examines the behavior of the two popularity-related metadata columns across the rating scale. Popularity remains high across most ratings, dropping only at the extremes, while the number of plays increases with rating up to the mid-range before declining. The second panel uses a logarithmic scale due to the wide range of play counts, from a few to 175,098, with a median of 385. Both columns provide information about the rating, which is important to consider before modeling and raises the cold start issue discussed in the limitations chapter.
+    49→[64][Normal] Figure 2.3: Rating against Popularity (a) and Number of Plays (b)
+    50→[68][Normal] The Themes column includes 73 distinct tactical tags. Figure 2.4 displays the twenty most frequent tags. The most common tags are structural, such as mate, middlegame, short, and long, which describe the solution line, while others like forks, pins, and discovered attacks describe motifs. Since several tags directly encode the solution length, they require further examination before being used as features, as discussed in Section 2.5.
+    51→[70][Normal] Figure 2.4: Twenty most frequent themes in the 50,000 puzzles
+    52→[71][Normal] The correlation matrix for the four numeric columns is shown in Figure 2.5. There is a moderate correlation between Popularity and NbPlays, and RatingDeviation correlates negatively with both of these, which is reasonable since a puzzle that has been played thousands of times has a stable and low deviation rating whereas a new puzzle has a high deviation. The rating itself is not strongly correlated with any of the numeric columns, a fact which already suggests that the classification task will not be easy.
+    53→[73][Normal] Correlation of the numeric columns — Figure 2.5
+    54→[75][Heading 2] 2.5 Potentially Leaking Themes
+    55→[76][Normal] Before building features I checked eight theme tags that describe the solution line rather than the position: mateIn1 to mateIn5 stateBefore feature construction, I reviewed eight theme tags that describe the solution line rather than the position: mateIn1 to mateIn5 indicate the number of moves required, oneMove is implied by mateIn1, and short and long describe the line length.
+    56→[77][Normal] These tags are tautological because they reveal the answer length, making it easier to classify difficulty without chess knowledge. and veryLong puzzles rises. A model that latches onto these flags would partly learn the answer length instead of the position. I did not remove them from the main feature set, because they are legitimately present in real puzzle metadata, but Chapter 4 contains a dedicated audit (Section 4.6) where all eight tags are removed and the performance drop is measured. This way the model quality with and without the leaking features is known exactly.
+    57→[80][Normal] Figure 2.6: The proportion of each solution length theme within each difficulty class
+    58→[84][Heading 1] Chapter 3
+    59→[85][Heading 1] Data Preprocessing and Descriptive Mining
+    60→[86][Heading 2] 3.1 The removal of columns and the process of feature engineering
+    61→[87][Normal] Preprocessing begins by dropping six columns: PuzzleId, GameUrl, and Moves (identifiers or links), OpeningTags and DailyDate (mostly empty), and Rating (the target variable, which must not be included as a feature). This leaves three numeric metadata columns, the FEN string, and the Themes. The FEN string enables extraction of chess-specific features. Using the python-chess library, I developed a function to read each position and extract fourteen board features, as listed in Table 3.1. These features capture material balance, mobility, and king safety using structural measures rather than full engine analysis, which is beyond the project's scope. All 50,000 positions were parsed without errors. errors.
+    62→[89][Normal] A list of the board features obtained from the FEN string (Table 3.1)
+    63→[91][Heading 2] 3.2 Encoding, Scaling and the Final Feature Matrix
+    64→[92][Normal] The Themes column is one-hot encoded, with each of the 73 theme tags represented as a binary column. Each puzzle receives a value of 1 for every tag present in its theme list. Combined with the three metadata columns and fourteen board features, the final feature matrix contains 90 features. After an 80/20 stratified split, the training set contains 40,000 rows and the test set 10,000 rows, with class proportions maintained & served.
+    65→[93][Normal] The seventeen numerical features (that is, the three metadata columns together with the fourteen board features) are standardised using the StandardScaler, and the scaler is fitted only on the training set. The 73 theme columns are already binary so they are not altered at all. Although the fact that the scaler is fitted only on the training set may seem like a minor point, it is in fact important since if the scaler had been fitted on the entire dataset it would have leaked information from the test set into the training features.
+    66→[95][Heading 2] 3.3 The use of the Apriori algorithm for association rule mining
+    67→[96][Normal] The descriptive aspect of the project searches for combinations of themes that occur together and then determines which of these combinations indicate a particular difficulty class. In the usual form stated by Agrawal and Srikant, a rule is given a measure of support (that is, how frequently the combination appears), a measure of confidence (that is, how often the consequence is true when the combination is present), and a lift (that is, how much more frequently the consequence occurs in conjunction with the combination than it would by chance).
+    68→[97][Normal] The matrix used as input includes all 50,000 puzzles' 73 theme columns together with four one-hot difficulty columns. Using a minimum support value of 0.05, the Apriori algorithm generates 153 frequent itemsets, comprising 24 single items, 70 pairs, 45 triples and 14 more complex combinations. Of these, only those rules which have a confidence of 0.70 or higher and a lift above 1.0 are selected, and from those only the rules that conclude with a difficulty class are kept; this results in 42 rules, all of which conclude with the Easy class, about which I will talk below.
+    69→[99][Normal] In Figure 3.1 the 42 rules are shown with their support plotted on the horizontal axis, confidence on the vertical axis and lift indicated by colour. The rules group together in a band of moderate support ranging from 0.05 to 0.12 and high confidence ranging from 0.7 to 0.9.
+    70→[102][Normal] Figure 3.1: The 42 mined rules, with support against confidence and coloured by lift
+    71→[104][Heading 2] 3.4 Rules indicating difficulty classes
+    72→[105][Normal] The strongest rules by lift are given in Table 3.2. The pattern is the same in that those combinations which include short-solution markers (mateIn1, mateIn2, oneMove) together with phase tags (endgame, middlegame) indicate the Easy class and have lifts ranging from about 4 to 8.3. At this support level no rule with a confidence greater than 0.70 indicates that a puzzle is either Hard or Expert. Although Hard puzzles do have typical themes, no one particular frequent theme combination is characteristic of the Hard class. Difficulty exceeding 2000 depends on the position and on the precision required, and no single tag that is shared by most of the puzzles captures this.
+    73→[109][Normal] Figure 3.2: Ten strongest rules by lift
+    74→[110][Normal] Table 3.2: Strongest association rules with a difficulty class in the consequent
+    75→[112][Normal] Two conclusions came out of this analysis. First, the descriptive and predictive views agree: the same solution-length tags that dominate the rule list are the ones flagged as tautological in Section 2.5, so the rules largely re-describe the answer length. Second, the absence of Hard and Expert rules means difficulty prediction needs models that combine many weak signals; simple rule based reasoning cannot capture it.
+    76→[113][Heading 1] Chapter 4
+    77→[114][Heading 1] Predictive Mining and Evaluation
+    78→[115][Heading 2] 4.1 Models and Hyperparameter Search
+    79→[116][Normal] Six classifiers are trained and compared under one protocol: a 5-fold stratified cross validation on the 40,000 training rows with macro F1 as the scoring metric. The Dummy classifier always predicts the most frequent class and exists only to set the lower bound. Decision Tree and Random Forest represent single trees and bagged ensembles, KNN is an instance based method, and LinearSVC and RBF SVM cover the linear and kernelised versions of support vector machines. The RBF SVM is tuned and evaluated on a stratified random subsample of 10,000 training rows with 3-fold cross validation, because a full grid on all 40,000 rows was not feasible on the available CPU. Table 4.1 lists the search grids.
+    80→[118][Normal] Table 4.1: Hyperparameter grids used with GridSearchCV
+    81→[119][Heading 2] 4.2 A Problem That Was Resolved While Mining
+    82→[120][Normal] The initial working version of the training cell failed during its very first execution. When running on the free Colab runtime the session crashed halfway through the first grid search and the log ended with thousands of repeated deprecation warnings from the notebook backend rather than showing the expected result lines. I initially thought the problem might be due to the dataset size, but the complete feature matrix consists of only about 40,000 rows by 90 columns, or roughly 36 MB in memory, a amount well below what a Colab session is capable of holding. In fact, there were three errors.
+    83→[121][Normal] In the first place, my code included nested parallelism since GridSearchCV was configured with n_jobs = 2 and the Random Forest within it also had n_jobs = 2; this caused each of the two search workers to create two additional threads of its own, resulting in four heavy-computing threads competing for just two CPU cores, with a separate copy of the data residing in each worker process. Second, the LinearSVC with max_iter = 10000 could take an unreasonably long time when processing the larger values of C. Third, one long cell that did not produce any output combined all six of the models, meaning that if a failure occurred, all the previous work would be lost.
+    84→[122][Normal] I converted the training matrix to float32, which reduced the memory usage by half and increased the speed of all the models without affecting the results. I transferred all the parallelism to the grid search level (by setting n_jobs to -1) and set the estimators themselves to use n_jobs = 1, thus eliminating thread oversubscription. In the case of LinearSVC I specifically set dual to False, since this solves the primal problem and is the appropriate choice whenever the number of samples is much greater than the number of features. Lastly, I divided up the training into separate parts for each model, saved each completed model to a checkpoint folder on Google Drive using joblib, and skipped any model for which a checkpoint already existed when the cell was run again.
+    85→[123][Normal] With the changes made to the training phase, all six models together with their full grids are completed in about six to ten minutes on a standard Colab runtime, and the only loss from a crashed session is incurred by the model which was running at the time of the crash. I have confirmed that the changes had no effect on the results: the cross validation scores from the old and the new training code agree to four decimal places for each model.
+    86→[124][Heading 2] 4.3 Cross-Validation Results
+    87→[125][Normal] Table 4.2 gives the macro F1 score together with the standard deviation obtained from the five folds, and Figure 4.1 presents the same figures in the form of a bar chart. The Random Forest has the highest value at 0.5928, then comes the single Decision Tree at 0.5788. The difference between these two is small, which indicates that the tree structure itself contains most of the signal and that bagging provides only a minor improvement. KNN reaches 0.5263, the RBF SVM attains 0.5442, and the LinearSVC brings the real models to an end by scoring 0.4740. The Dummy baseline is at 0.1346.
+    88→[127][Normal] See Table 4.2: the macro F1 score (mean and standard deviation over 5 folds)
+    89→[129][Normal] Figure 4.1: The macro F1 score with standard deviations calculated by
+    90→[130][Normal] cross-validation
+    91→[131][Normal] It is the two different SVM versions that exhibit the greatest difference in this table; although they are based on the same data and use the same penalty grid, the kernel version beats the linear one by seven percentage points, since the class boundaries in the feature space are not linear and any model capable only of drawing hyperplanes has to suffer the consequences.
+    92→[132][Heading 2] 4.4 Test Set Results
+    93→[133][Normal] Each model predicts the test set consisting of the 10,000 rows that were not used in the training phase exactly once. The four metrics for each model are given in Table 4.3, and the figures correspond to the order established by the cross-validation: the Random Forest is the best performing model, achieving an accuracy of 62.83% and a macro F1 score of 0.5909, this being almost the same as its cross-validation score of 0.5928, which shows that there is no gap between the performance when the model was tuned and when it was finally evaluated.
+    94→[135][Normal] See Table 4.3: the results from the test set of all six models (10,000 held-out puzzles)
+    95→[137][Normal] Regarding why macro F1 is the figure given: this is because Easy makes up 36.8% of the puzzles, so a classifier that always assigned instances to that class would achieve an accuracy of 36.8%, which is precisely what the Dummy row illustrates. Macro averaging gives equal weight to all four classes, and this is the more appropriate approach in this case. Compared with the Dummy macro F1 of 0.1346, the Random Forest improves the balanced score by a factor of about 4.4.
+    96→[138][Normal] The confusion matrices for all six models are presented in Figure 4.2, arranged in order of increasing difficulty from Easy at the top to Expert at the bottom. A clear pattern is that almost all of the mass lies on or adjacent to the diagonal. Figure 4.3 displays the one-vs-rest ROC curves for the same models. The Random Forest separates the Easy class almost cleanly, achieving an AUC of 0.924, and even the most difficult class, Medium, remains close to 0.78. This adjacency effect is quantified in Section 4.7.
+    97→[141][Normal] Figure 4.2: Confusion matrices of the six models on the test set
+    98→[143][Normal] Figure 4.3: One-vs-rest ROC curves per model
+    99→[144][Heading 2] 4.5 Feature Importance
+   100→[145][Normal] The fifteen most important features of the Random Forest are listed in Figure 4.4; the top three of these are the metadata columns—NbPlays, RatingDeviation and Popularity—then come the mate theme flag and the fork theme flag; the board features (material balance, piece counts, mobility) are in the middle of the ranking and have individually very small but non-zero contributions.
+   101→[148][Normal] Figure 4.4: The fifteen most important features of the Random Forest
+   102→[150][Normal] The metadata relating to popularity shows how the crowd has so far reacted to a puzzle. In the case of puzzles which have already been played thousands of times, this information is reasonable. However, for a puzzle that was published just yesterday, NbPlays and RatingDeviation appear completely different and as a result the model loses its three strongest signals. The leakage audit described in the following section looks at a similar risk in relation to the theme.
+   103→[154][Heading 2] 4.6 The leakage audit: eliminating the themes related to the solution length
+   104→[155][Normal] The eight theme tags mentioned in Section 2.5 are capable of encoding the length of the solution line directly. In order to assess how much the model relies on these tags, I retrained the same Random Forest model two times using the same data split: in Run A I used the complete set of features, and in Run B I excluded the eight tautological theme columns. The results of this are given in Table 4.4.
+   105→[157][Normal] Table 4.4: Checking for leakage in the Random Forest using the same split and the same settings
+   106→[159][Normal] The decrease of 1.13 percentage points is small. Although the model makes use of the solution-length tags, most of its performance is retained even when none of the eight columns are included, indicating that the model has learnt genuine positional and metadata signals. Yet the audit finds that the tautological features are not severe enough to warrant their removal from the main pipeline, and so both versions are left documented and reproducible.
+   107→[162][Heading 2] 4.7 Error Analysis
+   108→[163][Normal] Out of the 10,000 test puzzles, the Random Forest incorrectly classifies 3,717 of them, and it is the nature of these errors that is more important than the number. If the difficulty classes had been purely arbitrary labels, the errors would be evenly distributed among all pairs of classes; as it is, they are not, since 72.6% of the errors occur between neighbouring classes, and when a prediction is permitted to be off by one bin, the model is correct in 89.8% of the cases. Mistakes that are distant — for instance, classifying an Easy puzzle as Expert — are rare.
+   109→[164][Normal] The per-class accuracy shows where the losses are concentrated: easy puzzles are recognised well (85.1%), expert puzzles are recognised reasonably (61.8%), and the two middle classes are around 42% (Medium) and 48% (Hard). This is the kind of behaviour that is to be expected from a binned continuous scale since puzzles rated 1580 and 1620 are essentially identical but end up in different classes because of the 1600 boundary, and no feature set that excludes the rating itself is able to reliably resolve that difference.
+   110→[166][Normal] Table 4.5: Puzzles that were incorrectly classified (Random Forest, test set)
+   111→[168][Normal] All five of the mistakes listed in Table 4.5 adhere to the same pattern: the ratings are near a class boundary and the predictions differ by exactly one bin. The puzzle rated 1490 which the model classifies as Hard is 110 points below the boundary, while the one rated 2197 and referred to as Hard is 197 points above it. Since no element of the feature set is able to distinguish these positions from their neighbours on the other side of the boundary, the remaining error is mostly irreducible with respect to this feature set.
+   112→[169][Heading 2] 4.8 The Implemented System
+   113→[170][Normal] The notebook is the deliverable and is organised into six sequential stages which correspond to the sections of this report: data loading, exploratory analysis, preprocessing, association rule mining, model training and evaluation. It connects to Google Drive, reads the CSV from a predetermined path and writes each trained model to a checkpoint folder located in Drive together with a JSON file containing the results of the cross validation. Since each model checks for its own checkpoint file before training begins, the pipeline can be restarted after a interruption by merely rerunning the training cell, and completed models are never recomputed.
+   114→[171][Normal] On a standard Colab CPU runtime a full run from CSV to the final evaluation tables takes under half an hour including preprocessing, and the training phase alone takes roughly six to ten minutes with the optimisations described in Section 4.2. The notebook, the dataset and this report form the complete submission package.
+   115→[174][Normal] Chapter 5
+   116→[175][Normal] Conclusion
+   117→[177][Normal] The project started with a raw download of 50,000 puzzles from the Lichess database and developed a classification system which estimates puzzle difficulty based on the board position and the metadata, without having any view of the rating value that it is attempting to predict. On the held-out test set, the Random Forest achieved an accuracy of 62.83% and a macro F1 score of 0.5909, this being 4.4 times better than the majority-class baseline when using the balanced metric, and the cross validation figures closely predicted the test result.
+   118→[178][Normal] When looking at the descriptive mining from the other side, the same pattern appears: all the strongest association rules lead to the Easy class via short-solution themes, and there is no frequent rule combination that is characteristic of Hard or Expert puzzles. Difficulty exceeding the middle point of the scale isn't due to a single tag; rather, it results from the position and from metadata signals which only a model that combines many features is able to detect.
+   119→[179][Normal] The analysis of the errors accounts for the figure in the headline. About three quarters of the mistakes fall into the adjacent class, and with a tolerance range of one bin the model gets the answers correct for 89.8 per cent of the test set. Since the classes are arbitrary divisions on a continuous rating scale and 17 per cent of all puzzles are within 50 rating points of a boundary, the rest of the errors is mainly a result of the way the task has been defined.
+   120→[182][Heading 2] 5.1 The Benefits of this project
+   121→[183][List Paragraph] The pipeline is fully reproducible since it uses only one notebook, a single fixed dataset, fixed random seeds, and all the numbers that have been reported can be regenerated from scratch.
+   122→[184][List Paragraph] The document includes coverage of both types of mining: descriptive rule mining using Apriori and predictive modelling employing six classifiers all evaluated by the same evaluation protocol.
+   123→[185][List Paragraph] The assessment makes use of macro F1 as its main metric since this is suitable for the imbalanced four-class target and includes the Dummy baseline in order that the lift can be seen.
+   124→[186][List Paragraph] By carrying out a thorough leakage audit, genuine positional learning can be distinguished from shortcut features, and an error analysis based on tolerance reveals how the errors are distributed among the class boundaries.
+   125→[187][Heading 2] 5.2 The Disadvantages of This Project / Limitations
+   126→[188][List Paragraph] Difficulty is a continuous variable that is grouped into bins. The fixed thresholds result in boundary problems which cannot be dealt with correctly without reference to the rating itself, and as a result the accuracy achievable is limited at the level that the best model attained.
+   127→[189][List Paragraph] The top three factors are popularity metadata; in the case of new puzzles which have few plays these signals are weak or missing, so the system would have to undergo retraining or have its features adjusted before a genuine cold start deployment could take place.
+   128→[190][List Paragraph] The board features are of a structural nature only; the pipeline does not have engine evaluation, tactical depth measures, or solution-line analysis, and this means that the model cannot follow exactly what makes a position difficult.
+   129→[191][List Paragraph] The values for the class thresholds (1200 / 1600 / 2000) were determined by design. It is possible that a regression approach which predicts the rating first and then groups the results might yield better performance. It would also be worthwhile to try engine-derived features and models that analyse the move sequence.
+   130→[192][Normal] References
+   131→[193][Normal] [1] Lichess, "Lichess Open Database: Chess Puzzles," https://database.lichess.org/#puzzles (accessed August 2026).
+   132→[194][Normal] [2] N. Fiekas, "python-chess: A pure Python chess library," https://python-chess.readthedocs.io (accessed August 2026).
+   133→[195][Normal] [3] Google, "Google Colaboratory," https://colab.research.google.com (accessed August 2026).
+   134→
+   135→================================================================================
+   136→TABLES:
+   137→
+   138→--- Table 0 (12 rows x 3 cols) ---
+   139→Row 0: ['Column', 'Type', 'Description']
+   140→Row 1: ['PuzzleId', 'Text', 'Unique identifier of the puzzle']
+   141→Row 2: ['FEN', 'Text', 'Board position before the solution, in Forsyth-Edwards notation']
+   142→Row 3: ['Moves', 'Text', 'Solution move sequence in UCI notation']
+   143→Row 4: ['Rating', 'Integer', 'Glicko difficulty rating of the puzzle (target source)']
+   144→Row 5: ['RatingDeviation', 'Integer', 'Uncertainty of the rating; high values mean few plays']
+   145→Row 6: ['Popularity', 'Integer', 'User vote score between 0 and 100']
+   146→Row 7: ['NbPlays', 'Integer', 'Number of times the puzzle was played']
+   147→Row 8: ['Themes', 'Text', 'Space separated tactical theme tags']
+   148→Row 9: ['GameUrl', 'Text', 'Link to the original game']
+   149→Row 10: ['OpeningTags', 'Text', 'Opening names (mostly empty)']
+   150→Row 11: ['DailyDate', 'Text', 'Date field (almost entirely empty)']
+   151→
+   152→--- Table 1 (5 rows x 4 cols) ---
+   153→Row 0: ['Class', 'Rating range', 'Count', 'Share']
+   154→Row 1: ['Easy', '<= 1200', '18,414', '36.8%']
+   155→Row 2: ['Medium', '1201 - 1600', '11,947', '23.9%']
+   156→Row 3: ['Hard', '1601 - 2000', '10,107', '20.2%']
+   157→Row 4: ['Expert', '> 2000', '9,532', '19.1%']
+   158→
+   159→--- Table 2 (12 rows x 2 cols) ---
+   160→Row 0: ['Feature', 'Description']
+   161→Row 1: ['WhiteMaterial / BlackMaterial', 'Sum of piece values (P=1, N=B=3, R=5, Q=9) per side']
+   162→Row 2: ['MaterialBalance', 'White material minus black material']
+   163→Row 3: ['TotalPieces', 'Number of pieces on the board']
+   164→Row 4: ['WhitePawns / BlackPawns', 'Pawn count per side']
+   165→Row 5: ['IsWhiteTurn', '1 if White moves next, else 0']
+   166→Row 6: ['LegalMoveCount', 'Number of legal moves in the position (mobility)']
+   167→Row 7: ['InCheck', '1 if the side to move is in check']
+   168→Row 8: ['WhiteKingAttackers / BlackKingAttackers', 'How many enemy pieces attack each king']
+   169→Row 9: ['KingDistance', 'Chebyshev distance between the two kings']
+   170→Row 10: ['WhiteCastled', '1 if the white king stands on the kingside files g or h']
+   171→Row 11: ['WhiteDoubledPawns', 'Number of files with two or more white pawns']
+   172→
+   173→--- Table 3 (11 rows x 5 cols) ---
+   174→Row 0: ['Antecedents', 'Consequent', 'Support', 'Confidence', 'Lift']
+   175→Row 1: ['endgame, mateIn2', 'Easy', '0.053', '0.707', '8.26']
+   176→Row 2: ['endgame, mate, short', 'Easy', '0.053', '0.707', '8.26']
+   177→Row 3: ['mateIn1, middlegame', 'Easy', '0.064', '0.831', '6.82']
+   178→Row 4: ['mate, mateIn1, middlegame', 'Easy', '0.064', '0.831', '6.82']
+   179→Row 5: ['mate, middlegame, oneMove', 'Easy', '0.064', '0.831', '6.82']
+   180→Row 6: ['middlegame, oneMove', 'Easy', '0.080', '0.805', '6.60']
+   181→Row 7: ['mateIn2, middlegame', 'Easy', '0.087', '0.787', '6.46']
+   182→Row 8: ['mate, mateIn2, middlegame', 'Easy', '0.087', '0.787', '6.46']
+   183→Row 9: ['endgame, mateIn2, short', 'Easy', '0.053', '0.707', '6.35']
+   184→Row 10: ['endgame, mateIn3', 'Easy', '0.079', '0.710', '5.74']
+   185→
+   186→--- Table 4 (7 rows x 3 cols) ---
+   187→Row 0: ['Model', 'Parameters searched', 'Best found']
+   188→Row 1: ['Dummy', 'strategy = most_frequent', '-']
+   189→Row 2: ['Decision Tree', 'max_depth in {10, 15, 20, None}; min_samples_split in {2, 5, 10}', 'max_depth = 10, min_samples_split = 5']
+   190→Row 3: ['Random Forest', 'n_estimators in {100, 200, 300}; max_depth in {10, 20, None}', 'n_estimators = 200, max_depth = 20']
+   191→Row 4: ['KNN', 'n_neighbors in {3, 5, 7, 9}; weights in {uniform, distance}', 'n_neighbors = 9, weights = distance']
+   192→Row 5: ['LinearSVC', 'C in {0.1, 1, 10, 100}; max_iter = 10000', 'C = 1']
+   193→Row 6: ['RBF SVM', 'C in {1, 10, 100}; gamma in {scale, auto}', 'C = 1, gamma = scale']
+   194→
+   195→--- Table 5 (7 rows x 3 cols) ---
+   196→Row 0: ['Model', 'CV macro F1 (mean)', 'Std']
+   197→Row 1: ['Dummy', '0.1346', '0.0000']
+   198→Row 2: ['Decision Tree', '0.5788', '0.0015']
+   199→Row 3: ['Random Forest', '0.5928', '0.0038']
+   200→Row 4: ['KNN', '0.5263', '0.0032']
+   201→Row 5: ['LinearSVC', '0.4740', '0.0044']
+   202→Row 6: ['RBF SVM (10k subsample)', '0.5442', '0.0070']
+   203→
+   204→--- Table 6 (7 rows x 5 cols) ---
+   205→Row 0: ['Model', 'Accuracy', 'Precision (macro)', 'Recall (macro)', 'F1 (macro)']
+   206→Row 1: ['Dummy', '0.3683', '0.0921', '0.2500', '0.1346']
+   207→Row 2: ['Decision Tree', '0.6088', '0.5855', '0.5754', '0.5761']
+   208→Row 3: ['Random Forest', '0.6283', '0.5930', '0.5920', '0.5909']
+   209→Row 4: ['KNN', '0.5671', '0.5298', '0.5321', '0.5306']
+   210→Row 5: ['LinearSVC', '0.5390', '0.4842', '0.4875', '0.4700']
+   211→Row 6: ['RBF SVM', '0.5859', '0.5539', '0.5476', '0.5499']
+   212→
+   213→--- Table 7 (4 rows x 4 cols) ---
+   214→Row 0: ['Run', 'Feature set', 'Accuracy', 'Macro F1']
+   215→Row 1: ['Run A', 'All 90 features', '0.6144', '0.5805']
+   216→Row 2: ['Run B', '82 features, 8 tautological themes removed', '0.6031', '0.5694']
+   217→Row 3: ['Drop', '-', '1.13 pp', '1.10 pp']
+   218→
+   219→--- Table 8 (6 rows x 5 cols) ---
+   220→Row 0: ['PuzzleId', 'Rating', 'True class', 'Predicted', 'Themes']
+   221→Row 1: ['czIDl', '1490', 'Medium', 'Hard', 'advantage endgame short']
+   222→Row 2: ['CUVwr', '2063', 'Expert', 'Hard', 'advantage deflection discoveredAttack']
+   223→Row 3: ['VV6zH', '2197', 'Expert', 'Hard', 'crushing middlegame short']
+   224→Row 4: ['Zvfgn', '1304', 'Medium', 'Hard', 'crushing endgame long master']
+   225→Row 5: ['A2uyB', '1430', 'Medium', 'Hard', 'middlegame']
+
+[showing lines 1-225 of 226; use offset=226 with limit to continue reading]
