@@ -11,7 +11,7 @@ Classifies 50,000 Lichess chess puzzles into four difficulty classes (Easy / Med
 
 ## Live Demo
 
-[https://data-mining-one.vercel.app](https://data-mining-one.vercel.app)
+[https://data-mining-lovat.vercel.app](https://data-mining-lovat.vercel.app)
 
 ## Results
 
