@@ -775,12 +775,12 @@ function AssociationRulesSection() {
         </Card>
       </div>
 
-      <Card className="mt-6 border-amber-200 bg-amber-50">
+      <Card className="mt-6 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950">
         <CardContent className="flex items-start gap-3 p-4 pt-4">
-          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
           <div className="text-sm">
-            <span className="font-medium text-amber-900">Key finding. </span>
-            <span className="text-amber-800">
+            <span className="font-medium text-amber-900 dark:text-amber-100">Key finding. </span>
+            <span className="text-amber-800 dark:text-amber-200">
               All 42 rules conclude with Easy. The same solution-length tags that dominate the
               rule list are the ones flagged as tautological in §2.5 — the descriptive rules
               largely re-describe the answer length. No frequent rule combination is
@@ -833,13 +833,13 @@ function ModelsSection() {
           </CardContent>
         </Card>
 
-        <Card className="mt-6 border-emerald-200 bg-emerald-50">
+        <Card className="mt-6 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950">
           <CardContent className="p-4 pt-4">
             <div className="flex items-start gap-3">
-              <Cpu className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+              <Cpu className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
               <div className="text-sm">
-                <span className="font-medium text-emerald-900">Colab survival kit. </span>
-                <span className="text-emerald-800">
+                <span className="font-medium text-emerald-900 dark:text-emerald-100">Colab survival kit. </span>
+                <span className="text-emerald-800 dark:text-emerald-200">
                   The initial training cell crashed halfway through grid search. Three fixes:
                   (1) cast the feature matrix to float32 — halved memory and sped up all
                   models with no metric change; (2) moved all parallelism to GridSearchCV
@@ -882,7 +882,7 @@ function EvaluationSection() {
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={cvResults} margin={{ left: 8, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis dataKey="model" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={70} />
                 <YAxis domain={[0, 0.7]} tickFormatter={(v) => v.toFixed(2)} />
                 <Tooltip formatter={(v: number) => [v.toFixed(4), "Macro F1"]} />
@@ -915,10 +915,10 @@ function EvaluationSection() {
                 </TableHeader>
                 <TableBody>
                   {testResults.map((r) => (
-                    <TableRow key={r.model} className={r.model === "Random Forest" ? "bg-emerald-50" : ""}>
+                    <TableRow key={r.model} className={r.model === "Random Forest" ? "bg-emerald-50 dark:bg-emerald-950" : ""}>
                       <TableCell className="font-medium">
                         {r.model === "Random Forest" && (
-                          <Award className="mr-1 inline h-3.5 w-3.5 text-emerald-600" />
+                          <Award className="mr-1 inline h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                         )}
                         {r.model}
                       </TableCell>
@@ -1099,7 +1099,7 @@ function AuditAndErrorsSection() {
                     {leakageAudit.map((r) => (
                       <TableRow
                         key={r.run}
-                        className={r.run === "Drop" ? "border-t-2 border-amber-300 bg-amber-50" : ""}
+                        className={r.run === "Drop" ? "border-t-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950" : ""}
                       >
                         <TableCell>
                           <div className="font-medium">{r.run}</div>
@@ -1118,13 +1118,13 @@ function AuditAndErrorsSection() {
               </CardContent>
             </Card>
 
-            <Card className="border-emerald-200 bg-emerald-50">
+            <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  <span className="font-medium text-emerald-900">Interpretation</span>
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="font-medium text-emerald-900 dark:text-emerald-100">Interpretation</span>
                 </div>
-                <p className="text-sm text-emerald-800 leading-relaxed">
+                <p className="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed">
                   The drop of <strong>1.13 percentage points</strong> is small. The model
                   does make use of the solution-length tags, but most of its performance is
                   retained even when none of the eight columns are included — indicating the
