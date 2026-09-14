@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Crown,
   Download,
@@ -112,8 +112,8 @@ function Hero() {
           backgroundPosition: "0 0, 0 24px, 24px -24px, -24px 0",
         }}
       />
-      <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-28">
-        <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr] items-center">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 md:py-28">
+        <div className="grid gap-8 sm:gap-12 lg:grid-cols-[1.6fr_1fr] items-center">
           <div>
             <Badge
               variant="outline"
@@ -121,7 +121,7 @@ function Hero() {
             >
               <Crown className="mr-1.5 h-3.5 w-3.5" /> IS-212 Data Mining Project
             </Badge>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-6xl">
               Chess Puzzle<br />
               <span className="bg-gradient-to-r from-emerald-300 to-amber-300 bg-clip-text text-transparent">
                 Difficulty Classification
@@ -152,7 +152,7 @@ function Hero() {
               </Button>
             </div>
 
-            <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 text-sm sm:grid-cols-4">
+            <dl className="mt-8 sm:mt-10 grid grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-8 sm:gap-y-4 text-sm sm:grid-cols-4">
               <div>
                 <dt className="text-stone-400">Author</dt>
                 <dd className="font-medium">{projectMeta.author}</dd>
@@ -184,16 +184,16 @@ function Hero() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <div className="text-4xl font-bold text-emerald-300">62.83%</div>
+                <div className="text-3xl sm:text-4xl font-bold text-emerald-300">62.83%</div>
                 <div className="text-sm text-stone-400">Test-set accuracy</div>
               </div>
               <div>
-                <div className="text-2xl font-semibold text-amber-300">0.5909</div>
-                <div className="text-sm text-stone-400">Macro F1 (4.4× over baseline)</div>
+                <div className="text-xl sm:text-2xl font-semibold text-amber-300">0.5909</div>
+                <div className="text-xs sm:text-sm text-stone-400">Macro F1 (4.4× over baseline)</div>
               </div>
               <div>
-                <div className="text-2xl font-semibold text-stone-100">89.8%</div>
-                <div className="text-sm text-stone-400">Accuracy with ±1 bin tolerance</div>
+                <div className="text-xl sm:text-2xl font-semibold text-stone-100">89.8%</div>
+                <div className="text-xs sm:text-sm text-stone-400">Accuracy with ±1 bin tolerance</div>
               </div>
               <div className="flex items-center gap-2 pt-2 border-t border-stone-800 text-sm text-stone-300">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
@@ -211,6 +211,7 @@ function Hero() {
 function StickyNav() {
   const [active, setActive] = useState<string>("hero");
   const [scrolled, setScrolled] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -235,13 +236,19 @@ function StickyNav() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!navRef.current) return;
+    const link = navRef.current.querySelector(`[href="#${active}"]`) as HTMLElement;
+    if (link) link.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [active]);
+
   return (
     <nav
       className={`sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 transition-shadow ${
         scrolled ? "shadow-sm" : ""
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5 text-sm">
+      <div ref={navRef} className="mx-auto flex max-w-7xl items-center gap-1.5 sm:gap-2 overflow-x-auto px-3 sm:px-4 py-2.5 text-sm scroll-smooth" style={{ scrollbarWidth: "thin" }}>
         <div className="flex items-center gap-1.5 pr-3 font-semibold">
           <Crown className="h-4 w-4 text-emerald-600" />
           <span className="hidden sm:inline">Chess Puzzle Project</span>
@@ -250,7 +257,7 @@ function StickyNav() {
           <a
             key={s.id}
             href={`#${s.id}`}
-            className={`whitespace-nowrap rounded-md px-2.5 py-1.5 transition-colors hover:bg-muted ${
+            className={`whitespace-nowrap rounded-md px-2.5 py-2 sm:py-1.5 transition-colors hover:bg-muted ${
               active === s.id ? "bg-emerald-100 font-medium text-emerald-700" : "text-muted-foreground"
             }`}
           >
@@ -276,12 +283,12 @@ function SectionHeader({
   subtitle?: string;
 }) {
   return (
-    <div className="mb-8">
-      <div className="mb-2 text-sm font-medium uppercase tracking-wider text-emerald-600">
+    <div className="mb-6 sm:mb-8">
+      <div className="mb-2 text-xs sm:text-sm font-medium uppercase tracking-wider text-emerald-600">
         {chapter}
       </div>
-      <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-      {subtitle && <p className="mt-3 max-w-3xl text-muted-foreground">{subtitle}</p>}
+      <h2 className="text-2xl sm:text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
+      {subtitle && <p className="mt-2 sm:mt-3 max-w-3xl text-sm sm:text-base text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
@@ -289,7 +296,7 @@ function SectionHeader({
 // ─── Overview Section ──────────────────────────────────────────────────────────
 function Overview() {
   return (
-    <section id="overview" className="mx-auto max-w-7xl px-6 py-16">
+    <section id="overview" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
       <SectionHeader
         chapter="Chapter 1"
         title="Project Overview"
@@ -357,7 +364,7 @@ function DatasetSection() {
       id="dataset"
       className="border-y border-border bg-muted/30"
     >
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
         <SectionHeader
           chapter="Chapter 2"
           title="Dataset Description"
@@ -461,7 +468,7 @@ function DatasetSection() {
 // ─── EDA Section ────────────────────────────────────────────────────────────────
 function EDASection() {
   return (
-    <section id="eda" className="mx-auto max-w-7xl px-6 py-16">
+    <section id="eda" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
       <SectionHeader
         chapter="Chapter 2"
         title="Exploratory Data Analysis"
@@ -505,7 +512,7 @@ function EDASection() {
               <BarChart data={topThemes} layout="vertical" margin={{ left: 8, right: 16 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" />
-                <YAxis dataKey="theme" type="category" width={110} tick={{ fontSize: 10 }} />
+                <YAxis dataKey="theme" type="category" width={90} tick={{ fontSize: 9 }} interval={0} tickFormatter={(v) => v.length > 12 ? v.slice(0, 10) + '…' : v} />
                 <Tooltip formatter={(v: number) => [v.toLocaleString(), "Count"]} />
                 <Bar dataKey="count" fill="#0d9488" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -566,7 +573,7 @@ function EDASection() {
 function PreprocessingSection() {
   return (
     <section id="preprocessing" className="border-y border-border bg-muted/30">
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
         <SectionHeader
           chapter="Chapter 3"
           title="Preprocessing & Feature Engineering"
@@ -664,7 +671,7 @@ function AssociationRulesSection() {
   }));
 
   return (
-    <section id="rules" className="mx-auto max-w-7xl px-6 py-16">
+    <section id="rules" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
       <SectionHeader
         chapter="Chapter 3"
         title="Association Rule Mining"
@@ -694,7 +701,7 @@ function AssociationRulesSection() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <ScatterChart margin={{ left: 8, right: 16, top: 16 }}>
+              <ScatterChart margin={{ left: 12, right: 16, top: 16, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   type="number"
@@ -798,7 +805,7 @@ function AssociationRulesSection() {
 function ModelsSection() {
   return (
     <section id="models" className="border-y border-border bg-muted/30">
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
         <SectionHeader
           chapter="Chapter 4"
           title="Model Training"
@@ -866,7 +873,7 @@ function EvaluationSection() {
   const classLabels = ["Easy", "Medium", "Hard", "Expert"];
 
   return (
-    <section id="evaluation" className="mx-auto max-w-7xl px-6 py-16">
+    <section id="evaluation" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
       <SectionHeader
         chapter="Chapter 4"
         title="Evaluation Results"
@@ -986,13 +993,13 @@ function EvaluationSection() {
                             return (
                               <td
                                 key={j}
-                                className="p-2 text-center font-mono"
+                                className="p-1.5 sm:p-2 text-center font-mono text-[10px] sm:text-xs"
                                 style={{
                                   background: i === j
                                     ? `rgba(16, 185, 129, ${0.15 + intensity * 0.75})`
                                     : `rgba(239, 68, 68, ${intensity * 0.55})`,
                                   color: intensity > 0.5 ? "#fff" : "inherit",
-                                  minWidth: 70,
+                                  minWidth: 50,
                                 }}
                               >
                                 {v.toLocaleString()}
@@ -1046,7 +1053,7 @@ function EvaluationSection() {
 function AuditAndErrorsSection() {
   return (
     <section id="audit" className="border-y border-border bg-muted/30">
-      <div className="mx-auto max-w-7xl px-6 py-16 space-y-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16 space-y-12">
         {/* Feature importance */}
         <div>
           <SectionHeader
@@ -1055,16 +1062,16 @@ function AuditAndErrorsSection() {
             subtitle="The top three features are the metadata columns (NbPlays, RatingDeviation, Popularity), then the mate and fork theme flags. Board features sit in the middle of the ranking with small but non-zero contributions. This raises the cold-start concern: new puzzles with few plays lose their three strongest signals."
           />
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <ResponsiveContainer width="100%" height={420}>
                 <BarChart
                   data={featureImportances}
                   layout="vertical"
-                  margin={{ left: 8, right: 32 }}
+                  margin={{ left: 4, right: 16, sm: { left: 8, right: 32 } }}
                 >
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tickFormatter={(v) => v.toFixed(2)} />
-                  <YAxis dataKey="feature" type="category" width={140} tick={{ fontSize: 11 }} />
+                  <YAxis dataKey="feature" type="category" width={90} tick={{ fontSize: 9 }} interval={0} />
                   <Tooltip formatter={(v: number) => [v.toFixed(3), "Importance"]} />
                   <Bar dataKey="importance" fill="#0d9488" radius={[0, 4, 4, 0]} />
                 </BarChart>
@@ -1222,7 +1229,7 @@ function AuditAndErrorsSection() {
 // ─── Conclusion Section ─────────────────────────────────────────────────────────
 function ConclusionSection() {
   return (
-    <section id="conclusion" className="mx-auto max-w-7xl px-6 py-16">
+    <section id="conclusion" className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
       <SectionHeader chapter="Chapter 5" title="Conclusion" subtitle={conclusions.headline} />
 
       <div className="mb-8">
@@ -1290,7 +1297,7 @@ function ConclusionSection() {
                     href={r.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-emerald-600 hover:underline"
+                    className="text-emerald-600 hover:underline break-all"
                   >
                     {r.url}
                   </a>{" "}
@@ -1347,7 +1354,7 @@ function DownloadsSection() {
       id="downloads"
       className="border-t border-border bg-gradient-to-br from-stone-950 to-emerald-950 text-stone-100"
     >
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16">
         <div className="text-center mb-12">
           <Badge
             variant="outline"

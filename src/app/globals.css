@@ -120,3 +120,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile scroll hints for horizontal overflow containers */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: oklch(0.556 0 0 / 0.3);
+  border-radius: 4px;
+}
+
+/* Prevent long code/URL overflow on mobile */
+code {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
