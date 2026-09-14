@@ -180,6 +180,7 @@ This tells you: which pieces are where, whose turn it is, castling rights, etc.
 
 **Why does imbalance matter?** A model that always guesses "Easy" would be right 36.8% of the time — but that's useless. We need a metric that treats all classes equally.
 
+
 ---
 
 ## 2.5 Exploratory Data Analysis (EDA)
