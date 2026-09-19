@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A web application that predicts chess puzzle difficulty (Easy / Medium / Hard / Expert) using machine learning, built with Next.js and deployed on Vercel.
+A dataminig project that predicts chess puzzle difficulty (Easy / Medium / Hard / Expert) using machine learning, built with Next.js and deployed on Vercel.
 
 ## Features
 
