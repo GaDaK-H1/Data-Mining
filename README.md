@@ -1,82 +1,108 @@
-# Data Mining - Chess Puzzle Difficulty Classification
+# Data-Mining
 
-## Project Overview
+Chess Puzzle Difficulty Classification — an IS-212 Data and Knowledge Mining course project.
 
-A dataminig project that predicts chess puzzle difficulty (Easy / Medium / Hard / Expert) using machine learning, built with Next.js and deployed on Vercel.
+Classifies 50,000 Lichess chess puzzles into four difficulty classes (Easy / Medium / Hard / Expert) using six machine learning classifiers, Apriori association rule mining, and feature importance analysis.
 
-## Features
+**Author:** Hein Htet Zaw (YKPT-22466)
+**Institution:** University of Computer Studies, Yangon
+**Course:** DATA AND KNOWLEDGE MINING (IS-212) — Dr. Hsu Myat Mo
+**Academic Year:** 2025-2026, Semester IX
 
-- **Puzzle Difficulty Classification** - Upload or input chess puzzles and get instant difficulty predictions
-- **Multiple ML Models** - Random Forest, Decision Tree, KNN, SVM comparisons
-- **Interactive Dashboard** - Visualize predictions, feature importance, and model performance
-- **Chess Puzzle Analysis** - Extract 15 features from FEN positions using python-chess
-- **Association Rule Mining** - Discover frequent theme patterns using Apriori algorithm
+## Live Demo
+
+[https://data-mining-lovat.vercel.app](https://data-mining-lovat.vercel.app)
+
+## Results
+
+| Model | Macro F1 | Accuracy |
+|-------|----------|----------|
+| Random Forest | **0.5824** | **62.08%** |
+| Decision Tree | 0.5731 | 60.60% |
+| RBF SVM | 0.5499 | 58.59% |
+| KNN | 0.5306 | 56.71% |
+| LinearSVC | 0.4700 | 53.90% |
+| Dummy Baseline | 0.1346 | 36.83% |
 
 ## Tech Stack
 
-- **Frontend:** Next.js 15, React 19, Tailwind CSS, Shadcn/UI
-- **Backend:** Prisma ORM, PostgreSQL
-- **ML:** scikit-learn, pandas, python-chess
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **UI:** Tailwind CSS 4, shadcn/ui
+- **Charts:** Recharts
+- **Database:** SQLite via Prisma (boilerplate, not used by the page)
+- **Runtime:** Bun
 - **Deployment:** Vercel
+
+## Dataset
+
+50,000 puzzles from the [Lichess Open Database](https://database.lichess.org/#puzzles) with 11 columns including FEN, Moves, Rating, Themes, and metadata.
+
+**Difficulty distribution:**
+- Easy (<= 1200): 36.8%
+- Medium (1201-1600): 23.9%
+- Hard (1601-2000): 20.2%
+- Expert (> 2000): 19.1%
 
 ## Project Structure
 
 ```
-Data-Mining/
-├── src/                 # Next.js source code
-├── prisma/              # Database schema
-├── db/                  # Database files
-├── scripts/             # ML training scripts
-├── tests/               # Test files
-├── public/              # Static assets
-├── package.json
-├── vercel.json
-└── next.config.ts
+├── src/
+│   ├── app/
+│   │   ├── page.tsx          # Main page (all sections)
+│   │   ├── layout.tsx        # Root layout
+│   │   └── api/route.ts      # Hello world API
+│   ├── components/ui/        # shadcn/ui components
+│   └── lib/
+│       ├── project-data.ts   # All project data & results
+│       └── utils.ts          # cn() utility
+├── public/downloads/         # Downloadable project files
+├── prisma/                   # Schema (SQLite)
+├── scripts/                  # Analysis scripts
+├── upload/                   # Dataset & notebook
+└── vercel.json               # Vercel config
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- PostgreSQL database
-
-### Installation
+## Self-Hosting
 
 ```bash
-cd Data-Mining
-npm install
+# Install dependencies
+bun install
+
+# Set up database
+bun run db:generate
+bun run db:push
+
+# Start dev server
+bun run dev
 ```
 
-### Development
+Open [http://localhost:3000](http://localhost:3000).
 
-```bash
-npm run dev
-```
+## Deploy on Vercel
 
-### Build
+1. Push to GitHub
+2. Import repository on [vercel.com/new](https://vercel.com/new)
+3. Set environment variable: `DATABASE_URL=file:./db/custom.db`
+4. Deploy
 
-```bash
-npm run build
-```
+## Downloadable Files
 
-## Deployment
+| File | Size | Description |
+|------|------|-------------|
+| `project.ipynb` | 31 KB | Jupyter notebook (35 cells) |
+| `lichess_db_puzzle_sample.csv` | 8.9 MB | 50,000-row dataset |
+| `ProjectBook_HeinHtetZaw_YKPT22466.pdf` | 3.0 MB | Full project report |
+| `website-source.zip` | 26.3 MB | Complete source code |
 
-This project is configured for Vercel deployment. The `vercel.json` sets the root directory to `Data-Mining/`.
+## Key Findings
 
-## Dataset
-
-50,000 chess puzzles from [Lichess.org](https://lichess.org/) with difficulty ratings from 400 to 3100.
-
-## Classification Categories
-
-| Category | Rating Range |
-|----------|--------------|
-| Easy     | 0 - 1200     |
-| Medium   | 1201 - 1600  |
-| Hard     | 1601 - 2000  |
-| Expert   | 2001+        |
+- Random Forest achieved 4.3x improvement over the majority-class baseline on macro F1
+- Top 3 features are metadata (RatingDeviation, NbPlays, Popularity) — not board state
+- 72.6% of misclassifications are into adjacent difficulty classes
+- With one-bin tolerance, accuracy reaches 89.8%
+- All 42 strongest association rules lead to the Easy class via short-solution themes
 
 ## License
 
-Educational project for Data Mining coursework.
+Academic project — for educational purposes only.

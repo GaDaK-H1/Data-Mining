@@ -1,6 +1,0 @@
-{
-  "rootDirectory": "Data-Mining",
-  "buildCommand": "npx prisma generate && next build",
-  "installCommand": "npm install",
-  "outputDirectory": ".next"
-}
