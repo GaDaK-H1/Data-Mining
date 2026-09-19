@@ -92,7 +92,7 @@ Open [http://localhost:3000](http://localhost:3000).
 |------|------|-------------|
 | `project.ipynb` | 31 KB | Jupyter notebook (35 cells) |
 | `lichess_db_puzzle_sample.csv` | 8.9 MB | 50,000-row dataset |
-| `ProjectBook_HeinHtetZaw_YKPT22466.docx` | 3.0 MB | Full project report |
+| `ProjectBook_HeinHtetZaw_YKPT22466.pdf` | 3.0 MB | Full project report |
 | `website-source.zip` | 26.3 MB | Complete source code |
 
 ## Key Findings

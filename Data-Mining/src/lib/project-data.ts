@@ -17,7 +17,7 @@ export const projectMeta = {
   datasetSize: 50000,
   datasetFile: "lichess_db_puzzle_sample.csv",
   notebookFile: "project.ipynb",
-  reportFile: "ProjectBook_HeinHtetZaw_YKPT22466.docx",
+  reportFile: "ProjectBook_HeinHtetZaw_YKPT22466.pdf",
   source: "Lichess Open Database",
   sourceUrl: "https://database.lichess.org/#puzzles",
 };

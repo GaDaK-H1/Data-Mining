@@ -1321,12 +1321,12 @@ function DownloadsSection() {
       type: "CSV Dataset",
     },
     {
-      href: "/downloads/ProjectBook_HeinHtetZaw_YKPT22466.docx",
+      href: "/downloads/ProjectBook_HeinHtetZaw_YKPT22466.pdf",
       icon: FileText,
-      name: "ProjectBook_HeinHtetZaw_YKPT22466.docx",
+      name: "ProjectBook_HeinHtetZaw_YKPT22466.pdf",
       size: "3.0 MB",
       desc: "The full project report (5 chapters, 9 tables, all figures). Includes background, EDA, preprocessing, mining, evaluation, and conclusion.",
-      type: "Word Document",
+      type: "PDF Document",
     },
     {
       href: "/downloads/website-source.zip",
